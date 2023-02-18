@@ -105,3 +105,16 @@ class TicTacToe:
             if self.board[i] == 0:
                 return False
         return True
+
+    def encode_board(self):
+        """
+        Encodes the current state of the game board as a single integer.
+
+        Returns:
+            int: The encoded game board as a single integer.
+        """
+        board_as_string = ''
+        for i in self.board:
+            board_as_string += str(i)
+        return int(board_as_string)
+
