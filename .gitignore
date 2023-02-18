@@ -1,0 +1,3 @@
+#Gitignore all python side files like .pyc, .xml
+*.pyc
+*.xml
