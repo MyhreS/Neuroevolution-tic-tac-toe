@@ -11,7 +11,7 @@ class TestNodeGene(unittest.TestCase):
 
 class TestConnectionGene(unittest.TestCase):
     def test_init(self):
-        connection = ConnectionGene(0, 1, 0.5, True, 0)
+        connection = ConnectionGene(0, 1, 0.5, 0, True)
         self.assertEqual(connection.in_node, 0)
         self.assertEqual(connection.out_node, 1)
         self.assertEqual(connection.weight, 0.5)
@@ -31,7 +31,7 @@ class TestGenotype(unittest.TestCase):
 
     def test_add_connection(self):
         genotype = Genotype()
-        genotype.add_connection(0, 1, True, 0)
+        genotype.add_connection(0, 1, 0, True)
         self.assertEqual(len(genotype.connections), 1)
         self.assertEqual(genotype.connections[0].in_node, 0)
         self.assertEqual(genotype.connections[0].out_node, 1)

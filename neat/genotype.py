@@ -12,13 +12,14 @@ class Genotype:
         weight = random.random() * 0.8 + 0.1
         self.connections.append(ConnectionGene(id_in_node, id_out_node, weight, enabled, innovation_number))
 
+
 class NodeGene:
     def __init__(self, node_id, node_type):
         self.node_id = node_id
         self.node_type = node_type
 
 class ConnectionGene:
-    def __init__(self, in_node, out_node, weight, enabled=True, innovation_number=None):
+    def __init__(self, in_node, out_node, weight, innovation_number=None, enabled=True):
         self.in_node = in_node
         self.out_node = out_node
         self.weight = weight
