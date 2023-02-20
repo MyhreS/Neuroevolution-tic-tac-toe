@@ -49,10 +49,11 @@ class TestTicTacToe(unittest.TestCase):
         game.board = [1, 2, 1, 1, 1, 2, 2, 0, 2]
         self.assertFalse(game.check_tie())
 
-    def test_encode_board(self):
+    def test_encode_to_NN(self):
         game = TicTacToe(3)
         game.board = [1, 2, 1, 1, 1, 2, 2, 0, 2]
-        self.assertEqual(game.encode_board(), 121112202)
+        encoded_to_NN = game.encode_to_NN()
+        self.assertEqual(encoded_to_NN, [1, 2, 1, 1, 1, 2, 2, 0, 2, 1])
 
 if __name__ == '__main__':
     unittest.main()
