@@ -55,5 +55,13 @@ class TestTicTacToe(unittest.TestCase):
         encoded_to_NN = game.encode_to_NN()
         self.assertEqual(encoded_to_NN, [1, 2, 1, 1, 1, 2, 2, 0, 2, 1])
 
+    def test_reset_game(self):
+        game = TicTacToe(3)
+        game.board = [1, 2, 1, 1, 1, 2, 2, 0, 2]
+        game.player_turn = 2
+        game.reset_game()
+        self.assertEqual(game.board, [0, 0, 0, 0, 0, 0, 0, 0, 0])
+        self.assertEqual(game.player_turn, 1)
+
 if __name__ == '__main__':
     unittest.main()

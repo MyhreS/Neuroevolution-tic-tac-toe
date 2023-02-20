@@ -123,4 +123,11 @@ class TicTacToe:
         board = self.board + [self.player_turn]
         return board
 
+    def reset_game(self):
+        """
+        Resets the game board to the starting state.
+        """
+        self.board = [0] * (self.board_size**2)
+        self.player_turn = 1
+
 
