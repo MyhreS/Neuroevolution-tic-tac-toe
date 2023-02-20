@@ -1,3 +1,4 @@
+import random
 class TicTacToe:
     def __init__(self, board_size):
         """
@@ -39,7 +40,7 @@ class TicTacToe:
         """
         return self.player_turn == player
 
-    def make_move(self, player, position):
+    def make_move(self, position):
         """
         Makes a move on the game board.
 
@@ -48,20 +49,25 @@ class TicTacToe:
             position (int): The position on the game board to make the move (0 to board_size**2-1).
 
         Returns:
-            bool: True if the move was made successfully, False otherwise.
+            bool: True if the move was made successfully.
         """
-        # Check if position is already taken
+        # If position is taken, make random move.
         if self.board[position] != 0:
-            return False
-        # Make the move
-        self.board[position] = player
+            # Find the indexes of all empty positions
+            empty_positions = [i for i, x in enumerate(self.board) if x == 0]
+
+            # Pick a random empty position
+            position = random.choice(empty_positions)
+            self.board[position] = self.player_turn
+        else:
+            # Make the move
+            self.board[position] = self.player_turn
 
         # Change player turn
         if self.player_turn == 1:
             self.player_turn = 2
         else:
             self.player_turn = 1
-        return True
 
     def check_win(self, player):
         """
