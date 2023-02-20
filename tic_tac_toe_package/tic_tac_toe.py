@@ -108,10 +108,10 @@ class TicTacToe:
 
     def encode_to_NN(self):
         """
-        Encodes the current state of the game board as a single integer.
+        Encodes the current state of the game board to a list of the board including the player turn.
 
         Returns:
-            int: The encoded game board as a single integer.
+            list: The encoded game board.
         """
         # Add the player turn to the end of the board
         board = self.board + [self.player_turn]
