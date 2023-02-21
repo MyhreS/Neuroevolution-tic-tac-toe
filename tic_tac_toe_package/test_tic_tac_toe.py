@@ -11,12 +11,9 @@ class TestTicTacToe(unittest.TestCase):
 
     def test_make_move(self):
         game = TicTacToe(3)
-        self.assertTrue(game.make_move(1, 0))
-        self.assertEqual(game.board, [1, 0, 0, 0, 0, 0, 0, 0, 0])
+        game.make_move(1)
+        self.assertEqual(game.board, [0, 1, 0, 0, 0, 0, 0, 0, 0])
         self.assertEqual(game.player_turn, 2)
-
-        # Test making an invalid move
-        self.assertFalse(game.make_move(1, 0))
 
     def test_check_win(self):
         game = TicTacToe(3)
@@ -63,10 +60,10 @@ class TestTicTacToe(unittest.TestCase):
     def test_encode_to_NN(self):
         game = TicTacToe(3)
         game.board = [1,1,1,1,0,2,2,2,2]
-        encoded_to_NN = game.encode_to_NN()
+        encoded_to_NN = game.encode_to_NN(game.board)
         self.assertEqual(encoded_to_NN, [1,1,1,1,0,2,2,2,2])
         game.player_turn = 2
-        encoded_to_NN = game.encode_to_NN()
+        encoded_to_NN = game.encode_to_NN(game.board)
         self.assertEqual(encoded_to_NN, [2,2,2,2,0,1,1,1,1])
 
     def test_find_possible_boards(self):
