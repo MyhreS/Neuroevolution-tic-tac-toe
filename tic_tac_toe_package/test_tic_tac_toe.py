@@ -21,25 +21,25 @@ class TestTicTacToe(unittest.TestCase):
     def test_check_win(self):
         game = TicTacToe(3)
         game.board = [1, 1, 1, 0, 0, 0, 0, 0, 0]
-        self.assertTrue(game.check_win(1))
+        self.assertTrue(game.check_win_player(1))
 
         game.board = [0, 0, 0, 2, 2, 2, 0, 0, 0]
-        self.assertTrue(game.check_win(2))
+        self.assertTrue(game.check_win_player(2))
 
         game.board = [0, 0, 0, 0, 0, 0, 2, 2, 2]
-        self.assertTrue(game.check_win(2))
+        self.assertTrue(game.check_win_player(2))
 
         game.board = [1, 0, 0, 0, 1, 0, 0, 0, 1]
-        self.assertTrue(game.check_win(1))
+        self.assertTrue(game.check_win_player(1))
 
         game.board = [0, 0, 2, 0, 2, 0, 2, 0, 0]
-        self.assertTrue(game.check_win(2))
+        self.assertTrue(game.check_win_player(2))
 
         game.board = [0, 2, 0, 2, 0, 0, 2, 0, 0]
-        self.assertFalse(game.check_win(2))
+        self.assertFalse(game.check_win_player(2))
 
         game.board = [1, 0, 0, 0, 1, 0, 0, 0, 0]
-        self.assertFalse(game.check_win(1))
+        self.assertFalse(game.check_win_player(1))
 
     def test_check_tie(self):
         game = TicTacToe(3)
@@ -48,6 +48,17 @@ class TestTicTacToe(unittest.TestCase):
 
         game.board = [1, 2, 1, 1, 1, 2, 2, 0, 2]
         self.assertFalse(game.check_tie())
+
+    def test_check_board_state(self):
+        game = TicTacToe(3)
+        game.board = [1, 1, 1, 0, 0, 0, 0, 0, 0]
+        self.assertEqual(game.check_board_state(), 1) # Player 1 wins
+        game.board = [0, 0, 0, 2, 2, 2, 0, 0, 0]
+        self.assertEqual(game.check_board_state(), 2) # Player 2 wins
+        game.board = [1,1,2,2,2,1,1,2,1]
+        self.assertEqual(game.check_board_state(), 3) # Tie
+        game.board = [1,2,0,0,0,0,0,0,0]
+        self.assertEqual(game.check_board_state(), 0) # No winner or tie yet
 
     def test_encode_to_NN(self):
         game = TicTacToe(3)

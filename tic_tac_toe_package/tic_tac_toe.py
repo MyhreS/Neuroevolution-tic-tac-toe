@@ -70,7 +70,23 @@ class TicTacToe:
         else:
             self.player_turn = 1
 
-    def check_win(self, player):
+    def check_board_state(self):
+        """
+        Checks if the game has been won.
+
+        Returns:
+            bool: True if the game has been won, False otherwise.
+        """
+        if self.check_win_player(1):
+            return 1
+        elif self.check_win_player(2):
+            return 2
+        elif self.check_tie():
+            return 3
+        else:
+            return 0
+
+    def check_win_player(self, player):
         """
         Checks if the specified player has won the game.
 
