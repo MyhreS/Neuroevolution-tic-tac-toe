@@ -114,14 +114,24 @@ class TicTacToe:
 
     def encode_to_NN(self):
         """
-        Encodes the current state of the game board to a list of the board including the player turn.
+        Encodes the game board to that the players positions are represented by 1, the opponent's as 2 and empty positions as 0.
 
         Returns:
             list: The encoded game board.
         """
-        # Add the player turn to the end of the board
-        board = self.board + [self.player_turn]
-        return board
+        encoded_board = [0] * (self.board_size**2)
+        for i in range(self.board_size**2):
+            if self.player_turn == 2:
+                if self.board[i] == 1:
+                    encoded_board[i] = 2
+                elif self.board[i] == 2:
+                    encoded_board[i] = 1
+                else:
+                    encoded_board[i] = 0
+            else:
+                encoded_board[i] = self.board[i]
+        return encoded_board
+
 
     def reset_game(self):
         """
