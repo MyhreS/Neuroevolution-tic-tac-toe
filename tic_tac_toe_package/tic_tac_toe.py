@@ -40,6 +40,7 @@ class TicTacToe:
         """
         return self.player_turn == player
 
+
     def make_move(self, position):
         """
         Makes a move on the game board.
@@ -112,7 +113,23 @@ class TicTacToe:
                 return False
         return True
 
-    def encode_to_NN(self):
+    def find_possible_boards(self):
+        # Find the possible boards
+        moves = []
+        possible_boards = []
+        for i in range(len(self.board)):
+            if self.board[i] == 0:
+                moves.append(i)
+                possible_board = self.board.copy()
+                possible_board[i] = self.player_turn
+                possible_boards.append(possible_board)
+        encoded_possible_boards = []
+        # Encode the possible boards
+        for board in possible_boards:
+            encoded_possible_boards.append(self.encode_to_NN(board))
+        return encoded_possible_boards, moves
+
+    def encode_to_NN(self, board):
         """
         Encodes the game board to that the players positions are represented by 1, the opponent's as 2 and empty positions as 0.
 
@@ -122,14 +139,14 @@ class TicTacToe:
         encoded_board = [0] * (self.board_size**2)
         for i in range(self.board_size**2):
             if self.player_turn == 2:
-                if self.board[i] == 1:
+                if board[i] == 1:
                     encoded_board[i] = 2
-                elif self.board[i] == 2:
+                elif board[i] == 2:
                     encoded_board[i] = 1
                 else:
                     encoded_board[i] = 0
             else:
-                encoded_board[i] = self.board[i]
+                encoded_board[i] = board[i]
         return encoded_board
 
 
