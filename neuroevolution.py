@@ -77,17 +77,17 @@ def play_genomes(genomes, config):
             genome2.fitness = 0 if genome2.fitness is None else genome2.fitness
             game = TicTacToeGame(3)
             game.play(genome1, genome2, config)
-    for i, (genome_id1, genome1) in enumerate(genomes):
-        print("Genome ID: ", genome_id1, " Fitness: ", genome1.fitness)
+    #for i, (genome_id1, genome1) in enumerate(genomes):
+        #print("Genome ID: ", genome_id1, " Fitness: ", genome1.fitness)
 
 def run_population_with_neat(config):
     p = neat.Population(config)
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(neat.Checkpointer(1))
+    #p.add_reporter(neat.Checkpointer(1))
 
-    winner = p.run(play_genomes, 50)
+    winner = p.run(play_genomes, 300)
     with open("best.pickle", "wb") as f:
         pickle.dump(winner, f)
 
@@ -137,6 +137,6 @@ if __name__ == '__main__':
                          config_path)
 
 
-    #run_population_with_neat(config)
-    test_best_network(config)
+    run_population_with_neat(config)
+    #test_best_network(config)
 
