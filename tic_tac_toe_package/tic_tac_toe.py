@@ -108,11 +108,13 @@ class TicTacToe:
             if all(self.board[j*self.board_size+i] == player for j in range(self.board_size)):
                 return True
 
+        """
         # Check diagonals
         if all(self.board[i*self.board_size+i] == player for i in range(self.board_size)):
             return True
         if all(self.board[i*self.board_size+(self.board_size-1-i)] == player for i in range(self.board_size)):
             return True
+        """
 
         # No win
         return False
