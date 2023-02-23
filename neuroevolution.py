@@ -24,7 +24,7 @@ class TicTacToeGame:
         move = random.randint(0, self.game.board_size ** 2 - 1)
         return move
 
-    def smart_network(self):
+    def smart_bot(self):
         # This function returns the best possible move for the minimax player
         def minimax(board, depth, is_maximizing):
             def check_winner(board):
@@ -163,7 +163,7 @@ class TicTacToeGame:
                 if game.check_player_turn(2):
                     move = self.network(net1)
                 else:
-                    move = self.smart_network()
+                    move = self.smart_bot()
                 game.make_move(move)
 
                 # Find out if the game is over
@@ -217,7 +217,7 @@ def run_population_with_neat(config):
     p.add_reporter(stats)
     #p.add_reporter(neat.Checkpointer(1))
 
-    winner = p.run(play_genomes, 500)
+    winner = p.run(play_genomes, 200)
     with open("best_against_smart_bot.pickle", "wb") as f:
         pickle.dump(winner, f)
 
