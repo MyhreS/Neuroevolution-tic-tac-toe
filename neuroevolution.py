@@ -258,47 +258,6 @@ def test_best_network(config):
             game_over = True
     game.reset_game()
 
-def test_trained_nets_against_each_other():
-    with open("best_against_dumb_bot.pickle", "rb") as f:
-        winner1 = pickle.load(f)
-    winner_net_1 = neat.nn.FeedForwardNetwork.create(winner1, config)
-
-    with open("best_against_genome.pickle", "rb") as f:
-        winner2 = pickle.load(f)
-    winner_net_2 = neat.nn.FeedForwardNetwork.create(winner2, config)
-
-    game = TicTacToe(3)
-    game_over = False
-    game.print_board()
-    while not game_over:
-        if game.check_player_turn(1):
-            board_states, moves = game.find_possible_boards()
-            predictions = []
-            for board_state in board_states:
-                predictions.append(winner_net_1.activate(board_state))
-            move = np.argmax(predictions)
-        else:
-            board_states, moves = game.find_possible_boards()
-            predictions = []
-            for board_state in board_states:
-                predictions.append(winner_net_2.activate(board_state))
-            move = np.argmax(predictions)
-        game.make_move(int(move))
-        game.print_board()
-
-        # Find out if the game is over
-        board_state = game.check_board_state()
-        if board_state == 1:
-            print("Player 1 won")
-            game_over = True
-        elif board_state == 2:
-            print("Player 2 won")
-            game_over = True
-        elif board_state == 3:
-            print("Tie")
-            game_over = True
-
-
 
 
 
@@ -312,6 +271,5 @@ if __name__ == '__main__':
 
 
     #run_population_with_neat(config)
-    #test_best_network(config)
-    play_trained_nets_against_each_other()
+    test_best_network(config)
 
