@@ -183,43 +183,35 @@ class TicTacToeGame:
 
 
 
-# TODO: Make the net not gain fitness by tieing.
-def play_genomes(genomes, config):
-    """
-    Make each genome play tic-tac-toe.
-    """
+def run_population_with_neat(config, save_path, generations, opponent="smart_bot"):
+    def play_genomes(genomes, config, opponent="smart_bot"):
+        if opponent == "smart_bot":
+            for i, (genome_id1, genome1) in enumerate(genomes):
+                genome1.fitness = 0
+                game = TicTacToeGame(3)
+                game.play_smart_bot(genome1, config)
+        elif opponent == "dumb_bot":
+            for i, (genome_id1, genome1) in enumerate(genomes):
+                genome1.fitness = 0
+                game = TicTacToeGame(3)
+                game.play_dumb_bot(genome1, config)
+        elif opponent == "individuals":
+            for i, (genome_id1, genome1) in enumerate(genomes):
+                genome1.fitness = 0
+                for genome_id2, genome2 in random.sample(genomes, len(genomes)):
+                    game = TicTacToeGame(3)
+                    genome2.fitness = 0 if genome2.fitness is None else genome2.fitness
+                    game.play_genome(genome1, genome2, config)
+        else:
+            raise ValueError("Opponent must be either 'smart_bot', 'dumb_bot' or 'individuals'")
 
-    # 100 pr genome * 2 because of attack and defend.
-    """
-    for i, (genome_id1, genome1) in enumerate(genomes):
-        genome1.fitness = 0
-        for genome_id2, genome2 in random.sample(genomes, len(genomes)):
-            game = TicTacToeGame(3)
-            genome2.fitness = 0 if genome2.fitness is None else genome2.fitness
-            game.play_genome(genome1, genome2, config)
-    """
-    
-    """
-    for i, (genome_id1, genome1) in enumerate(genomes):
-        genome1.fitness = 0
-        game = TicTacToeGame(3)
-        game.play_dumb_bot(genome1, config)
-    """
-
-    for i, (genome_id1, genome1) in enumerate(genomes):
-        genome1.fitness = 0
-        game = TicTacToeGame(3)
-        game.play_smart_bot(genome1, config)
-
-def run_population_with_neat(config):
     p = neat.Population(config)
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    #p.add_reporter(neat.Checkpointer(1))
 
-    winner = p.run(play_genomes, 200)
-    with open("save_trained_models_here/best_against_smart_bot.pickle", "wb") as f:
+    winner = p.run(lambda genomes, config: play_genomes(genomes, config, opponent=opponent), generations)
+    with open(save_path, "wb") as f:
         pickle.dump(winner, f)
 
 def test_best_network(config):
@@ -259,8 +251,44 @@ def test_best_network(config):
     game.reset_game()
 
 
+"""
+This is a function that trains network one. Network one is the network which plays against other network individuals.
+"""
+def train_network_one(save_path, generations):
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'config.txt')
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+    run_population_with_neat(config, save_path, generations, opponent="individuals")
+
+"""
+This is a function that trains network two. Network one is the network which plays against a bot making random moves.
+"""
+def train_network_two(save_path, generations):
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'config.txt')
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+    run_population_with_neat(config, save_path, generations, opponent="dumb_bot")
+
+"""
+This is a function that trains network three. Network one is the network which plays against a bot based on the minmax algorithm.
+"""
+def train_network_three(save_path, generations):
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'config.txt')
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+    run_population_with_neat(config, save_path, generations, opponent="smart_bot")
 
 
+"""
 if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config.txt')
@@ -272,4 +300,4 @@ if __name__ == '__main__':
 
     #run_population_with_neat(config)
     test_best_network(config)
-
+"""
