@@ -2,6 +2,7 @@
 This project demonstrates a simple tic-tac-toe game that trains three AI players using neuroevolution. 
 The AI is trained with the NEAT (NeuroEvolution of Augmenting Topologies) algorithm, and the game is 
 implemented in Python using the neat-python library. 
+The code is public at Github: https://github.com/MyhreS/Neuroevolution-tic-tac-toe
 
 ## Setup
 Before running the project, ensure that the required libraries are installed. You can find the list of 
