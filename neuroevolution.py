@@ -1,8 +1,6 @@
-import math
 import os
 import pickle
 import random
-
 import numpy as np
 import neat
 from tic_tac_toe_package import TicTacToe
@@ -72,8 +70,7 @@ class TicTacToeGame:
 
     def play_individual_opponent(self, genome1, genome2, config):
         """
-        Train the AI by passing two NEAT neural networks and the NEAT config object.
-        These AI's will play against each other to determine their fitness.
+        The individual will play against another individual.
         """
 
         net1 = neat.nn.FeedForwardNetwork.create(genome1, config)
@@ -114,7 +111,7 @@ class TicTacToeGame:
 
     def play_random_move_opponent(self, genome1, config):
         """
-        The get_best_move_from_network will play a dumb bot 5 times that does random moves,
+        The individuals will play against a algorithm making random moves.
         """
         net1 = neat.nn.FeedForwardNetwork.create(genome1, config)
         self.genome1 = genome1
@@ -141,11 +138,16 @@ class TicTacToeGame:
             self.game.reset_game()
 
     def play_minimax_algorithm_opponent(self, genome1, config):
+        """
+        The individual will play against a minimax algorithm.
+        """
+
         net1 = neat.nn.FeedForwardNetwork.create(genome1, config)
         self.genome1 = genome1
 
+        number_of_times = 50
         game = TicTacToe(3)
-        for i in range(50):
+        for i in range(number_of_times):
             game_over = False
             while not game_over:
                 if game.check_player_turn(2):
@@ -157,19 +159,14 @@ class TicTacToeGame:
                 # Find out if the game is over
                 board_state = game.check_board_state()
                 if board_state == 1:
-                    #print("Player 1 won")
                     self.genome1.fitness += 1
                     game_over = True
                 elif board_state == 2:
-                    #print("Player 2 won")
                     game_over = True
                 elif board_state == 3:
                     self.genome1.fitness += 0.2
-                    #print("Tie")
                     game_over = True
             game.reset_game()
-
-
 
 def run_population_with_neat(config, save_path, generations, opponent="individuals"):
     def run(genomes, config, opponent="individuals"):
@@ -194,7 +191,7 @@ def run_population_with_neat(config, save_path, generations, opponent="individua
             raise ValueError("Opponent must be either 'individuals', 'random' or 'minimax'")
 
     p = neat.Population(config)
-    p.add_reporter(neat.StdOutReporter(True))
+    p.add_reporter(neat.StdOutReporter(False))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
@@ -202,11 +199,10 @@ def run_population_with_neat(config, save_path, generations, opponent="individua
     with open(save_path, "wb") as f:
         pickle.dump(winner, f)
 
-
-"""
-This is a function that evolves network individuals using NEAT against a specified opponent. It saves the champion to a file.
-"""
-def evolve_a_champion(save_path, generations, opponent="individuals"):
+def evolve_a_champion(save_path, generations=1, opponent="individuals"):
+    """
+    This is a function that evolves network individuals using NEAT against a specified opponent. It saves the champion to a file.
+    """
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config.txt')
 
@@ -215,10 +211,10 @@ def evolve_a_champion(save_path, generations, opponent="individuals"):
                          config_path)
     run_population_with_neat(config, save_path, generations, opponent=opponent)
 
-"""
-This is a function that test the champion against a human player.
-"""
 def human_play_against_champion(path_to_champion):
+    """
+    This is a function that test the champion against a human player.
+    """
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config.txt')
 
@@ -261,11 +257,10 @@ def human_play_against_champion(path_to_champion):
             game_over = True
     game.reset_game()
 
-
-"""
-This is a function that test a champion against either a random opponent or a minimax opponent, by playing fifty games.
-"""
 def test_fifty_games_against_opponent(path_to_champion, opponent="minimax"):
+    """
+    This is a function that test a champion against either a random opponent or a minimax opponent, by playing fifty games.
+    """
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config.txt')
 
@@ -310,6 +305,54 @@ def test_fifty_games_against_opponent(path_to_champion, opponent="minimax"):
         game.game.reset_game()
 
     print(f"Wins: {wins}, Losses: {losses}, Ties: {ties}")
+
+def test_champions_against_each_other(path_to_champion1, path_to_champion2):
+    """
+    Tests two champions against each other. Each starts as player 1 and player 2, meaning that there are two games played.
+    """
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'config.txt')
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+
+    with open(path_to_champion1, "rb") as f:
+        champion1 = pickle.load(f)
+    net1 = neat.nn.FeedForwardNetwork.create(champion1, config)
+
+    with open(path_to_champion2, "rb") as f:
+        champion2 = pickle.load(f)
+    net2 = neat.nn.FeedForwardNetwork.create(champion2, config)
+
+    game = TicTacToeGame(3)
+    wins = [0, 0]
+    ties = 0
+
+    for round_number in range(2):
+        game_over = False
+        while not game_over:
+            if game.game.check_player_turn(1):
+                move = game.get_best_move_from_network(net1 if round_number == 0 else net2)
+            else:
+                move = game.get_best_move_from_network(net2 if round_number == 0 else net1)
+            game.game.make_move(move)
+
+            # Find out if the game is over
+            board_state = game.game.check_board_state()
+            if board_state == 1:
+                wins[round_number] += 1
+                game_over = True
+            elif board_state == 2:
+                wins[1 - round_number] += 1
+                game_over = True
+            elif board_state == 3:
+                ties += 1
+                game_over = True
+        game.game.reset_game()
+
+    print(f"Champion 1 wins: {wins[0]} --- Champion 2 wins: {wins[1]} --- Ties: {ties}")
+
 
 
 
