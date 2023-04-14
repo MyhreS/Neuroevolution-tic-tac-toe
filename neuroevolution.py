@@ -70,7 +70,7 @@ class TicTacToeGame:
                     best_move = i
         return best_move
 
-    def play_genome(self, genome1, genome2, config):
+    def play_individual_opponent(self, genome1, genome2, config):
         """
         Train the AI by passing two NEAT neural networks and the NEAT config object.
         These AI's will play against each other to determine their fitness.
@@ -112,7 +112,7 @@ class TicTacToeGame:
             self.game.reset_game()
             # TODO: Play the get_best_move_from_network against dumb and a smart bot and give additional fitness if the get_best_move_from_network win.
 
-    def play_dumb_bot(self, genome1, config):
+    def play_random_move_opponent(self, genome1, config):
         """
         The get_best_move_from_network will play a dumb bot 5 times that does random moves,
         """
@@ -140,7 +140,7 @@ class TicTacToeGame:
                     game_over = True
             self.game.reset_game()
 
-    def play_smart_bot(self, genome1, config):
+    def play_minimax_algorithm_opponent(self, genome1, config):
         net1 = neat.nn.FeedForwardNetwork.create(genome1, config)
         self.genome1 = genome1
 
@@ -171,27 +171,27 @@ class TicTacToeGame:
 
 
 
-def run_population_with_neat(config, save_path, generations, opponent="get_best_move_from_minimax"):
-    def run(genomes, config, opponent="get_best_move_from_minimax"):
-        if opponent == "get_best_move_from_minimax":
+def run_population_with_neat(config, save_path, generations, opponent="individuals"):
+    def run(genomes, config, opponent="individuals"):
+        if opponent == "minimax":
             for i, (genome_id1, genome1) in enumerate(genomes):
                 genome1.fitness = 0
                 game = TicTacToeGame(3)
-                game.play_smart_bot(genome1, config)
-        elif opponent == "get_random_move":
+                game.play_minimax_algorithm_opponent(genome1, config)
+        elif opponent == "random":
             for i, (genome_id1, genome1) in enumerate(genomes):
                 genome1.fitness = 0
                 game = TicTacToeGame(3)
-                game.play_dumb_bot(genome1, config)
+                game.play_random_move_opponent(genome1, config)
         elif opponent == "individuals":
             for i, (genome_id1, genome1) in enumerate(genomes):
                 genome1.fitness = 0
                 for genome_id2, genome2 in random.sample(genomes, len(genomes)):
                     game = TicTacToeGame(3)
                     genome2.fitness = 0 if genome2.fitness is None else genome2.fitness
-                    game.play_genome(genome1, genome2, config)
+                    game.play_individual_opponent(genome1, genome2, config)
         else:
-            raise ValueError("Opponent must be either 'get_best_move_from_minimax', 'get_random_move' or 'individuals'")
+            raise ValueError("Opponent must be either 'individuals', 'random' or 'minimax'")
 
     p = neat.Population(config)
     p.add_reporter(neat.StdOutReporter(True))
@@ -201,6 +201,7 @@ def run_population_with_neat(config, save_path, generations, opponent="get_best_
     winner = p.run(lambda genomes, config: run(genomes, config, opponent=opponent), generations)
     with open(save_path, "wb") as f:
         pickle.dump(winner, f)
+
 
 """
 This is a function that test the champion against a human player.
@@ -250,38 +251,15 @@ def human_play_against_champion(path_to_champion):
 
 
 """
-This is a function that trains get_best_move_from_network one. Network one is the get_best_move_from_network which plays against other get_best_move_from_network individuals.
+This is a function that evolves network individuals using NEAT against a specified opponent. It saves the champion to a file.
 """
-def train_network_one(save_path, generations):
+def evolve_a_champion(save_path, generations, opponent="individuals"):
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config.txt')
 
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
-    run_population_with_neat(config, save_path, generations, opponent="individuals")
+    run_population_with_neat(config, save_path, generations, opponent=opponent)
 
-"""
-This is a function that trains get_best_move_from_network two. Network two is the get_best_move_from_network which plays against a bot making random moves.
-"""
-def train_network_two(save_path, generations):
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config.txt')
-
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_path)
-    run_population_with_neat(config, save_path, generations, opponent="get_random_move")
-
-"""
-This is a function that trains get_best_move_from_network three. Network three is the get_best_move_from_network which plays against a bot based on the minmax algorithm.
-"""
-def train_network_three(save_path, generations):
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config.txt')
-
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_path)
-    run_population_with_neat(config, save_path, generations, opponent="get_best_move_from_minimax")
 
