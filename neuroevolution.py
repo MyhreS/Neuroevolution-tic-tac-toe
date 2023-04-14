@@ -11,65 +11,53 @@ class TicTacToeGame:
     def __init__(self, board_size):
         self.game = TicTacToe(board_size)
 
-    def network(self, net):
+    def get_best_move_from_network(self, net):
         # Make the network rank the possible moves. It will move to the highest ranked move.
         board_states, moves = self.game.find_possible_boards()
-        predictions = []
-        for board_state in board_states:
-            predictions.append(net.activate(board_state))
+        predictions = [net.activate(board_state) for board_state in board_states]
         move = np.argmax(predictions)
         return int(move)
 
-    def dumb_bot(self):
+    def get_random_move(self):
         move = random.randint(0, self.game.board_size ** 2 - 1)
         return move
 
-    def smart_bot(self):
+    def get_best_move_from_minimax(self):
         # This function returns the best possible move for the minimax player
+
+        # Helper function to check if the game is over
+        def check_winner(board):
+            # Check for horizontal wins
+            for i in range(0, 9, 3):
+                if board[i] == board[i + 1] and board[i + 1] == board[i + 2] and board[i] != 0:
+                    return board[i]
+
+            # Check for vertical wins
+            for i in range(3):
+                if board[i] == board[i + 3] and board[i + 3] == board[i + 6] and board[i] != 0:
+                    return board[i]
+
+            # If there are no winners yet
+            return 0
+
+        # The main minimax function
         def minimax(board, depth, is_maximizing):
-            def check_winner(board):
-                # Check for horizontal wins
-                for i in range(0, 9, 3):
-                    if board[i] == board[i + 1] and board[i + 1] == board[i + 2] and board[i] != 0:
-                        return board[i]
-
-                # Check for vertical wins
-                for i in range(3):
-                    if board[i] == board[i + 3] and board[i + 3] == board[i + 6] and board[i] != 0:
-                        return board[i]
-
-                # If there are no winners yet
-                return 0
-
-            # Check if the game is over
             result = check_winner(board)
             if result != 0:
                 return result
 
-            # If the minimax player is maximizing
-            if is_maximizing:
-                best_score = -float("inf")
-                for i in range(9):
-                    if board[i] == 0:
-                        board[i] = 2
-                        score = minimax(board, depth + 1, False)
-                        board[i] = 0
-                        best_score = max(score, best_score)
-                return best_score
+            best_score = -float("inf") if is_maximizing else float("inf")
+            update_best_score = max if is_maximizing else min
 
-            # If the minimax player is minimizing
-            else:
-                best_score = float("inf")
-                for i in range(9):
-                    if board[i] == 0:
-                        board[i] = 1
-                        score = minimax(board, depth + 1, True)
-                        board[i] = 0
-                        best_score = min(score, best_score)
-                return best_score
+            for i in range(9):
+                if board[i] == 0:
+                    board[i] = 2 if is_maximizing else 1
+                    score = minimax(board, depth + 1, not is_maximizing)
+                    board[i] = 0
+                    best_score = update_best_score(score, best_score)
+            return best_score
 
         board = self.game.board.copy()
-        # This function returns the index of the best possible move for the minimax player
         best_score = -float("inf")
         best_move = -1
         for i in range(9):
@@ -80,7 +68,7 @@ class TicTacToeGame:
                 if score > best_score:
                     best_score = score
                     best_move = i
-            return best_move
+        return best_move
 
     def play_genome(self, genome1, genome2, config):
         """
@@ -99,14 +87,14 @@ class TicTacToeGame:
                 # Make move
                 if round_number == 1:
                     if self.game.player_turn == 1:
-                        move = self.network(net1)
+                        move = self.get_best_move_from_network(net1)
                     else:
-                        move = self.network(net2)
+                        move = self.get_best_move_from_network(net2)
                 else:
                     if self.game.player_turn == 1:
-                        move = self.network(net2)
+                        move = self.get_best_move_from_network(net2)
                     else:
-                        move = self.network(net1)
+                        move = self.get_best_move_from_network(net1)
                 self.game.make_move(move)
 
                 # Find out if the game is over
@@ -122,11 +110,11 @@ class TicTacToeGame:
                     self.genome2.fitness += 0.2
                     game_over = True
             self.game.reset_game()
-            # TODO: Play the network against dumb and a smart bot and give additional fitness if the network win.
+            # TODO: Play the get_best_move_from_network against dumb and a smart bot and give additional fitness if the get_best_move_from_network win.
 
     def play_dumb_bot(self, genome1, config):
         """
-        The network will play a dumb bot 5 times that does random moves,
+        The get_best_move_from_network will play a dumb bot 5 times that does random moves,
         """
         net1 = neat.nn.FeedForwardNetwork.create(genome1, config)
         self.genome1 = genome1
@@ -135,9 +123,9 @@ class TicTacToeGame:
             while not game_over:
                 # Make move
                 if self.game.player_turn == 1:
-                    move = self.network(net1)
+                    move = self.get_best_move_from_network(net1)
                 else:
-                    move = self.dumb_bot()
+                    move = self.get_random_move()
                 self.game.make_move(move)
 
                 # Find out if the game is over
@@ -161,9 +149,9 @@ class TicTacToeGame:
             game_over = False
             while not game_over:
                 if game.check_player_turn(2):
-                    move = self.network(net1)
+                    move = self.get_best_move_from_network(net1)
                 else:
-                    move = self.smart_bot()
+                    move = self.get_best_move_from_minimax()
                 game.make_move(move)
 
                 # Find out if the game is over
@@ -183,14 +171,14 @@ class TicTacToeGame:
 
 
 
-def run_population_with_neat(config, save_path, generations, opponent="smart_bot"):
-    def play_genomes(genomes, config, opponent="smart_bot"):
-        if opponent == "smart_bot":
+def run_population_with_neat(config, save_path, generations, opponent="get_best_move_from_minimax"):
+    def run(genomes, config, opponent="get_best_move_from_minimax"):
+        if opponent == "get_best_move_from_minimax":
             for i, (genome_id1, genome1) in enumerate(genomes):
                 genome1.fitness = 0
                 game = TicTacToeGame(3)
                 game.play_smart_bot(genome1, config)
-        elif opponent == "dumb_bot":
+        elif opponent == "get_random_move":
             for i, (genome_id1, genome1) in enumerate(genomes):
                 genome1.fitness = 0
                 game = TicTacToeGame(3)
@@ -203,19 +191,29 @@ def run_population_with_neat(config, save_path, generations, opponent="smart_bot
                     genome2.fitness = 0 if genome2.fitness is None else genome2.fitness
                     game.play_genome(genome1, genome2, config)
         else:
-            raise ValueError("Opponent must be either 'smart_bot', 'dumb_bot' or 'individuals'")
+            raise ValueError("Opponent must be either 'get_best_move_from_minimax', 'get_random_move' or 'individuals'")
 
     p = neat.Population(config)
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    winner = p.run(lambda genomes, config: play_genomes(genomes, config, opponent=opponent), generations)
+    winner = p.run(lambda genomes, config: run(genomes, config, opponent=opponent), generations)
     with open(save_path, "wb") as f:
         pickle.dump(winner, f)
 
-def test_best_network(config):
-    with open("save_trained_models_here/best_against_smart_bot.pickle", "rb") as f:
+"""
+This is a function that test the champion against a human player.
+"""
+def human_play_against_champion(path_to_champion):
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'config.txt')
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+
+    with open(path_to_champion, "rb") as f:
         winner = pickle.load(f)
     winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
 
@@ -252,7 +250,7 @@ def test_best_network(config):
 
 
 """
-This is a function that trains network one. Network one is the network which plays against other network individuals.
+This is a function that trains get_best_move_from_network one. Network one is the get_best_move_from_network which plays against other get_best_move_from_network individuals.
 """
 def train_network_one(save_path, generations):
     local_dir = os.path.dirname(__file__)
@@ -264,7 +262,7 @@ def train_network_one(save_path, generations):
     run_population_with_neat(config, save_path, generations, opponent="individuals")
 
 """
-This is a function that trains network two. Network two is the network which plays against a bot making random moves.
+This is a function that trains get_best_move_from_network two. Network two is the get_best_move_from_network which plays against a bot making random moves.
 """
 def train_network_two(save_path, generations):
     local_dir = os.path.dirname(__file__)
@@ -273,10 +271,10 @@ def train_network_two(save_path, generations):
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
-    run_population_with_neat(config, save_path, generations, opponent="dumb_bot")
+    run_population_with_neat(config, save_path, generations, opponent="get_random_move")
 
 """
-This is a function that trains network three. Network three is the network which plays against a bot based on the minmax algorithm.
+This is a function that trains get_best_move_from_network three. Network three is the get_best_move_from_network which plays against a bot based on the minmax algorithm.
 """
 def train_network_three(save_path, generations):
     local_dir = os.path.dirname(__file__)
@@ -285,19 +283,5 @@ def train_network_three(save_path, generations):
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
-    run_population_with_neat(config, save_path, generations, opponent="smart_bot")
+    run_population_with_neat(config, save_path, generations, opponent="get_best_move_from_minimax")
 
-
-"""
-if __name__ == '__main__':
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'config.txt')
-
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_path)
-
-
-    #run_population_with_neat(config)
-    test_best_network(config)
-"""
