@@ -219,11 +219,11 @@ def run_population_with_neat(config):
     #p.add_reporter(neat.Checkpointer(1))
 
     winner = p.run(play_genomes, 200)
-    with open("best_against_smart_bot.pickle", "wb") as f:
+    with open("save_trained_models_here/best_against_smart_bot.pickle", "wb") as f:
         pickle.dump(winner, f)
 
 def test_best_network(config):
-    with open("best_against_smart_bot.pickle", "rb") as f:
+    with open("save_trained_models_here/best_against_smart_bot.pickle", "rb") as f:
         winner = pickle.load(f)
     winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
 
