@@ -204,6 +204,18 @@ def run_population_with_neat(config, save_path, generations, opponent="individua
 
 
 """
+This is a function that evolves network individuals using NEAT against a specified opponent. It saves the champion to a file.
+"""
+def evolve_a_champion(save_path, generations, opponent="individuals"):
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, 'config.txt')
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+    run_population_with_neat(config, save_path, generations, opponent=opponent)
+
+"""
 This is a function that test the champion against a human player.
 """
 def human_play_against_champion(path_to_champion):
@@ -251,15 +263,54 @@ def human_play_against_champion(path_to_champion):
 
 
 """
-This is a function that evolves network individuals using NEAT against a specified opponent. It saves the champion to a file.
+This is a function that test a champion against either a random opponent or a minimax opponent, by playing fifty games.
 """
-def evolve_a_champion(save_path, generations, opponent="individuals"):
+def test_fifty_games_against_opponent(path_to_champion, opponent="minimax"):
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config.txt')
 
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
-    run_population_with_neat(config, save_path, generations, opponent=opponent)
+
+    with open(path_to_champion, "rb") as f:
+        winner = pickle.load(f)
+    winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
+
+    game = TicTacToeGame(3)
+    wins = 0
+    ties = 0
+    losses = 0
+
+    for _ in range(50):
+        game_over = False
+        while not game_over:
+            if game.game.check_player_turn(1):
+                move = game.get_best_move_from_network(winner_net)
+            else:
+                if opponent == "minimax":
+                    move = game.get_best_move_from_minimax()
+                elif opponent == "random":
+                    move = game.get_random_move()
+                else:
+                    raise ValueError("Opponent must be either 'random' or 'minimax'")
+            game.game.make_move(move)
+
+            # Find out if the game is over
+            board_state = game.game.check_board_state()
+            if board_state == 1:
+                wins += 1
+                game_over = True
+            elif board_state == 2:
+                losses += 1
+                game_over = True
+            elif board_state == 3:
+                ties += 1
+                game_over = True
+        game.game.reset_game()
+
+    print(f"Wins: {wins}, Losses: {losses}, Ties: {ties}")
+
+
 
 
