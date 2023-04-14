@@ -264,7 +264,7 @@ def train_network_one(save_path, generations):
     run_population_with_neat(config, save_path, generations, opponent="individuals")
 
 """
-This is a function that trains network two. Network one is the network which plays against a bot making random moves.
+This is a function that trains network two. Network two is the network which plays against a bot making random moves.
 """
 def train_network_two(save_path, generations):
     local_dir = os.path.dirname(__file__)
@@ -276,7 +276,7 @@ def train_network_two(save_path, generations):
     run_population_with_neat(config, save_path, generations, opponent="dumb_bot")
 
 """
-This is a function that trains network three. Network one is the network which plays against a bot based on the minmax algorithm.
+This is a function that trains network three. Network three is the network which plays against a bot based on the minmax algorithm.
 """
 def train_network_three(save_path, generations):
     local_dir = os.path.dirname(__file__)
